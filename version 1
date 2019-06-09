@@ -1,0 +1,88 @@
+#include<LiquidCrystal.h>
+#define alko_sensor A0
+#define S0 4
+#define S1 5
+#define S2 6
+#define S3 2
+#define sensorOut 8
+#define trig 7
+#define echo 9
+int m11 =3 , m12 =10, m21 =12, m22 =13;
+
+int frequency=0;
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(trig,OUTPUT);
+  pinMode(echo,INPUT);
+  
+  pinMode(S0, OUTPUT);
+  pinMode(S1, OUTPUT);
+  pinMode(S2, OUTPUT);
+  pinMode(S3, OUTPUT);
+  pinMode(sensorOut, INPUT);
+  digitalWrite(S0, HIGH);
+  digitalWrite(S1, LOW);
+  
+  pinMode(alko_sensor,INPUT);
+  
+  pinMode(3,OUTPUT);
+  pinMode(10,OUTPUT);
+  pinMode(12,OUTPUT);
+  pinMode(13,OUTPUT);
+  
+}
+void loop()
+{
+  float adcvalue=0;
+  for(int i=0;i<10;i++)
+  {
+    adcvalue+=analogRead(alko_sensor);
+    delay(10);
+  }
+  float v=(adcvalue/10)*(5.0/1024.0);
+  float mgl=.67*v;
+  Serial.print("\t");
+  Serial.print("mgl=");
+  Serial.println(mgl);
+  delay(100);
+  digitalWrite(S2, LOW);
+  digitalWrite(S3, LOW);
+
+  frequency= pulseIn(sensorOut, LOW);
+  frequency= map(frequency,0,255,255,0);
+  Serial.print("\t");
+  Serial.print("R= ");
+  Serial.print(frequency);
+  delay(100);
+  digitalWrite(trig,LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig,HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig,LOW);
+  long duration=pulseIn(echo,HIGH);
+  float distance=(0.0343*duration)/2;
+  Serial.print("\t");
+  Serial.print("D=");
+  Serial.println(distance);
+  Serial.print("\n");
+  delay(10);
+  if((frequency<245)&&(distance>40)&&(mgl<1.4))
+  {
+    digitalWrite(3,1);
+    digitalWrite(10,0);
+    digitalWrite(12,1);
+    digitalWrite(13,0);
+    
+  }
+  else
+  {
+    digitalWrite(3,0);
+    digitalWrite(10,0);
+    digitalWrite(12,0);
+    digitalWrite(13,0);
+  }
+}
+  
+    
+ 
